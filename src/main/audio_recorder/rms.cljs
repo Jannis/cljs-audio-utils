@@ -43,8 +43,7 @@
     (if (empty? samples)
       0
       (let [sum-by-n (/ squared-sum (count samples))]
-        #?(:clj  (Math/sqrt    sum-by-n)
-           :cljs (js/Math.sqrt sum-by-n))))))
+        (js/Math.sqrt sum-by-n)))))
 
 
 (defn rms-buffer
