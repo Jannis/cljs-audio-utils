@@ -1,0 +1,2 @@
+{:require [audio-recorder.app]
+ :init-fns [audio-recorder.app/init]}
