@@ -65,15 +65,13 @@
 (deftask test-once
   []
   (comp
-   (test-cljs)
-   (test)))
+   (test-cljs)))
 
 (deftask test-auto
   []
   (comp
    (watch)
-   (test-cljs)
-   (test)))
+   (test-cljs)))
 
 (deftask deploy-snapshot
   []
