@@ -1,23 +1,24 @@
 (ns audio-utils.app
   (:require [om.next :as om :refer-macros [defui]]
-            [om.dom :as dom]))
+            [om.dom :as dom]
+            [audio-utils.recorder :refer [Recorder recorder]]))
 
 (enable-console-print!)
 
 (defonce initial-state
-  {:app/recording? false})
+  {:app/record? false})
 
 (defmulti read om/dispatch)
 
-(defmethod read :app/recording?
+(defmethod read :app/record?
   [{:keys [state]} key params]
   {:value (get @state key)})
 
 (defmulti mutate om/dispatch)
 
-(defmethod mutate 'app/enable-recording
-  [{:keys [state]} key {:keys [enable?]}]
-  {:action #(swap! state assoc :app/recording? enable?)})
+(defmethod mutate 'app/toggle-recording
+  [{:keys [state]} key {:keys [record?]}]
+  {:action #(swap! state assoc :app/record? record?)})
 
 (defonce parser
   (om/parser {:read read :mutate mutate}))
@@ -29,25 +30,26 @@
 (defui App
   static om/IQuery
   (query [_]
-    [:app/recording?])
+    [:app/record?])
 
   Object
-  (enable-recording [this enable]
-    (om/transact! this `[(app/enable-recording {:enable? ~enable})]))
+  (toggle-recording [this record?]
+    (om/transact! this `[(app/toggle-recording {:record? ~record?})]))
 
   (render [this]
-    (let [{:keys [app/recording?]} (om/props this)]
-      (println "Recording?" (:app/recording? (om/props this)))
+    (let [{:keys [app/record?]} (om/props this)]
+      (println "Record?" (:app/record? (om/props this)))
       (dom/div nil
         (dom/h1 nil "Audio Recorder Test")
+        (recorder {:record? record?})
         (dom/h2 nil "Recorded Audio Info")
         (dom/div nil "...")
         (dom/p nil
-          (if recording?
-            (dom/button #js {:onClick #(.enable-recording this false)}
-              "Disable recording")
-            (dom/button #js {:onClick #(.enable-recording this true)}
-              "Enable recording")))))))
+          (if record?
+            (dom/button #js {:onClick #(.toggle-recording this false)}
+              "Stop recording")
+            (dom/button #js {:onClick #(.toggle-recording this true)}
+              "Start recording")))))))
 
 (defonce root (atom nil))
 
