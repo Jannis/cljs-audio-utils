@@ -1,7 +1,7 @@
 #!/usr/bin/env boot
 
 (set-env!
- :source-paths #{"src/test"}
+ :source-paths #{"src/test" "test"}
  :resource-paths #{"resources" "src/main"}
  :dependencies '[;; Boot
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
@@ -25,7 +25,7 @@
          '[crisptrutski.boot-cljs-test :refer [test-cljs exit!]]
          '[pandeiro.boot-http :refer [serve]])
 
-(def +project+ 'cljs-audio-recorder)
+(def +project+ 'cljs-audio-utils)
 (def +version+ "0.1.0-SNAPSHOT")
 
 (bootlaces! +version+ :dont-modify-paths? true)
@@ -39,11 +39,11 @@
             :ensure-clean true
             :ensure-tag (last-commit)
             :ensure-version +version+}
- pom       {:project 'cljs-audio-recorder
+ pom       {:project 'cljs-audio-utils
             :version +version+
             :description "Audio recorder for ClojureScript"
-            :url "https://github.com/jannis/cljs-audio-recorder"
-            :scm {:url "https://github.com/jannis/cljs-audio-recorder"}
+            :url "https://github.com/jannis/cljs-audio-utils"
+            :scm {:url "https://github.com/jannis/cljs-audio-utils"}
             :license {"MIT License"
                       "https://opensource.org/licenses/MIT"}})
 
@@ -58,7 +58,7 @@
   []
   (comp
    (watch)
-   (reload :on-jsload  'audio-recorder.app/reload)
+   (reload :on-jsload  'audio-utils.app/reload)
    (build-dev)
    (serve)))
 

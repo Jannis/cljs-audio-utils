@@ -1,4 +1,4 @@
-(ns audio-recorder.app
+(ns audio-utils.app
   (:require [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]))
 
