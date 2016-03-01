@@ -20,7 +20,8 @@
     (let [{:keys [audio-ctx gate]} (om/get-state this)
           source                   (.createMediaStreamSource audio-ctx
                                                              stream)]
-      (.connect source (.-destination audio-ctx))))
+      (.connect source gate)
+      (.connect gate (.-destination audio-ctx))))
 
   (stop [this]
     (let [audio-ctx (:audio-ctx (om/get-state this))]
