@@ -13,8 +13,8 @@
   {:x-axis (viz/linear-axis
             {:domain      [0 n]
              :range       [50 (- width 10)]
-             :major       100
-             :minor       10
+             :major       (Math.ceil (* n 0.2))
+             :minor       (Math.ceil (* n 0.1))
              :pos         (- height 50)})
    :y-axis (viz/linear-axis
             {:domain      [-1.0 1.0]
