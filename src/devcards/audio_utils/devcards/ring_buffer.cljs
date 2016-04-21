@@ -118,7 +118,7 @@
    -1.0 to -0.33 are replaced with the second 100 values from
    -0.33 to 0.33 and then replaced with the third 100 values
    from 0.33 to 1.0. Taking 200 values out results in 100
-   values from -0.33 to 1.0, followed by 100 nils."
+   values from 0.33 to 1.0, followed by 100 nils."
   (let [data (linear-distribution [-1.0 1.0] 300)]
     (plot-buffer 200
                  (drop 200 data)
