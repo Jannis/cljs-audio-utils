@@ -1,4 +1,4 @@
-(ns audio-utils.rms)
+(ns audio-utils.rms-buffer)
 
 (defprotocol IRMSBuffer
   "Interface for implementations of RMS volume computation buffers."
