@@ -95,16 +95,17 @@
     (plot-buffers 1250 "Input" data "RMS Values" rms-values)))
 
 (defcard
-  "500 zeros, 100 1.0s and 2400 zeros along with RMS values
+  "500 zeros, 100 1.0s and 1400 zeros along with RMS values
    calculated after adding each individual sample to an RMS
-   buffer with size 1000. Starting with the 1.0s, the RMS
-   value quickly rises but never reaches 1.0s due to the
-   large RMS buffer window size. After the 1.0s it slowly
-   decreases again until the RMS buffer is full. From this
-   point, the ratio of 0.0s to 1.0s in the RMS window remains
-   the same (resulting in a constant RMS value) until the
-   RMS window slides out of the 100 1.0s, resulting in a
-   decrease down to an RMS value of 0.0. This final decrease
+   buffer with a window size of 1000 samples.
+
+   Starting with the 1.0s, the RMS value quickly rises but
+   never reaches 1.0s due to the large RMS buffer window size.
+   After the 1.0s it slowly decreases again until the RMS buffer
+   is full. From this point, the ratio of 0.0s to 1.0s in the RMS
+   window remains the same (resulting in a constant RMS value)
+   until the RMS window slides out of the 100 1.0s, resulting in
+   a decrease down to an RMS value of 0.0. This final decrease
    takes exactly 100 samples (corresponding to the 1.0s)."
   (let [data        (concat (repeat 500 0.0)
                             (repeat 100 1.0)
