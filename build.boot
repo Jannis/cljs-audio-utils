@@ -1,7 +1,7 @@
 #!/usr/bin/env boot
 
 (set-env!
- :source-paths #{"src/test" "test"}
+ :source-paths #{"src/test" "test" "src/devcards"}
  :resource-paths #{"resources" "src/main"}
  :dependencies '[;; Boot
                  [adzerk/boot-cljs "1.7.228-1" :scope "test"]
@@ -15,7 +15,8 @@
                  [org.clojure/clojurescript "1.7.228"]
 
                  ;; Test app
-                 [org.omcljs/om "1.0.0-alpha30"]])
+                 [org.omcljs/om "1.0.0-alpha30"]
+                 [devcards "0.2.1-6"]])
 
 (require '[adzerk.boot-cljs :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]]
@@ -41,7 +42,7 @@
             :ensure-version +version+}
  pom       {:project 'cljs-audio-utils
             :version +version+
-            :description "Audio recorder for ClojureScript"
+            :description "Audio utilities for ClojureScript web apps"
             :url "https://github.com/jannis/cljs-audio-utils"
             :scm {:url "https://github.com/jannis/cljs-audio-utils"}
             :license {"MIT License"
@@ -52,13 +53,14 @@
   (comp
    (cljs :source-map true
          :optimizations :none
-         :compiler-options {:parallel-build true})))
+         :compiler-options {:devcards true
+                            :parallel-build true})))
 
 (deftask dev
   []
   (comp
    (watch)
-   (reload :on-jsload  'audio-utils.app/reload)
+   (reload :on-jsload 'audio-utils.devcards.core/reload)
    (build-dev)
    (serve)))
 
