@@ -15,8 +15,9 @@
                  [org.clojure/clojurescript "1.7.228"]
 
                  ;; Test app
+                 [devcards "0.2.1-6"]
                  [org.omcljs/om "1.0.0-alpha30"]
-                 [devcards "0.2.1-6"]])
+                 [thi.ng/geom "0.0.908"]])
 
 (require '[adzerk.boot-cljs :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]]
