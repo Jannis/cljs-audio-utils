@@ -8,22 +8,26 @@
   "100 zeroes in a ring buffer of size 100. Taking 100 values
    out of it results in 100 values of 0.0."
   (let [data (repeat 100 0.0)]
-    (plot-buffers 100 data (into (ring-buffer 100) data))))
+    (plot-buffers 100
+                  "Expected" data
+                  "Actual"   (into (ring-buffer 100) data))))
 
 (defcard
   "100 zeroes in a ring buffer of size 100. Taking 200 values
    out of it results in 100 values of 0.0, followed by 100
    nils."
   (let [data (repeat 100 0.0)]
-    (plot-buffers 200 data (into (ring-buffer 100) data))))
+    (plot-buffers 200
+                  "Expected" data
+                  "Actual"   (into (ring-buffer 100) data))))
 
 (defcard
   "100 zeroes and 100 ones in a ring buffer of size 100.
    Taking 100 values out of results in 100 values of 1.0."
   (let [data (concat (repeat 100 0.0) (repeat 100 1.0))]
     (plot-buffers 100
-                  (drop 100 data)
-                  (into (ring-buffer 100) data))))
+                  "Expected" (drop 100 data)
+                  "Actual"   (into (ring-buffer 100) data))))
 
 (defcard
   "100 values linearly distributed between -1.0 and 1.0
@@ -31,8 +35,8 @@
    it results in 10 values starting at -1.0."
   (let [data (linear-distribution [-1.0 1.0] 100)]
     (plot-buffers 10
-                  (take 10 data)
-                  (into (ring-buffer 100) data))))
+                  "Expected" (take 10 data)
+                  "Actual"   (into (ring-buffer 100) data))))
 
 (defcard
   "100 values linearly distributed between -1.0 and 1.0
@@ -40,8 +44,8 @@
    it results in 100 values from -1.0 to 1.0."
   (let [data (linear-distribution [-1.0 1.0] 100)]
     (plot-buffers 100
-                  (take 100 data)
-                  (into (ring-buffer 100) data))))
+                  "Expected" (take 100 data)
+                  "Actual"   (into (ring-buffer 100) data))))
 
 (defcard
   "100 values linearly distributed between -1.0 and 1.0
@@ -50,8 +54,8 @@
    by 100 nils."
   (let [data (linear-distribution [-1.0 1.0] 100)]
     (plot-buffers 200
-                  (take 100 data)
-                  (into (ring-buffer 100) data))))
+                  "Expected" (take 100 data)
+                  "Actual"   (into (ring-buffer 100) data))))
 
 (defcard
   "200 values linearly distributed between -1.0 and 1.0
@@ -62,8 +66,8 @@
    from 0.0 to 1.0, followed by 100 nils."
   (let [data (linear-distribution [-1.0 1.0] 200)]
     (plot-buffers 200
-                  (drop 100 data)
-                  (into (ring-buffer 100) data))))
+                  "Expected" (drop 100 data)
+                  "Actual"   (into (ring-buffer 100) data))))
 
 (defcard
   "300 values linearly distributed between -1.0 and 1.0
@@ -75,5 +79,5 @@
    values from 0.33 to 1.0, followed by 100 nils."
   (let [data (linear-distribution [-1.0 1.0] 300)]
     (plot-buffers 200
-                  (drop 200 data)
-                  (into (ring-buffer 100) data))))
+                  "Expected" (drop 200 data)
+                  "Actual"   (into (ring-buffer 100) data))))

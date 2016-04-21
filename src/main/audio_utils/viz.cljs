@@ -38,13 +38,15 @@
        (svg/svg {:width width :height height})))
 
 (defn plot-buffers
-  [n expected buffer]
-  (let [width 400 height 400]
+  [n & buffers]
+  (let [width 875 height 400]
     (sab/html
      [:table
       [:tbody
        [:tr
-        [:td (plot-n n expected width height)
-         [:div {:style {:text-align "center"}} "Expected"]]
-        [:td (plot-n n buffer   width height)
-         [:div {:style {:text-align "center"}} "Actual"]]]]])))
+        (doall
+         (for [[label buffer] (partition 2 2 buffers)]
+           [:td (plot-n n buffer
+                        (/ width (/ (count buffers) 2))
+                        height)
+            [:div {:style {:text-align "center"}} label]]))]]])))
