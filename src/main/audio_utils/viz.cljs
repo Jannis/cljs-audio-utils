@@ -8,6 +8,11 @@
   [domain n]
   (mapv #((viz/linear-scale [0 n] domain) %) (range 0 n)))
 
+(defn sine-wave
+  [freq sample-rate n]
+  (mapv #(js/Math.sin (* % freq 2 (/ js/Math.PI sample-rate)))
+        (range 0 n)))
+
 (defn plot-data
   [n buffer width height]
   {:x-axis (viz/linear-axis
