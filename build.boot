@@ -15,6 +15,7 @@
                  [org.clojure/clojurescript "1.7.228"]
 
                  ;; Test app
+                 [binaryage/devtools "0.5.2"]
                  [devcards "0.2.1-6"]
                  [org.omcljs/om "1.0.0-alpha30"]
                  [thi.ng/geom "0.0.908"]])
