@@ -1,5 +1,5 @@
 (ns audio-utils.ring-buffer
-  (:require [audio-utils.util :refer [aatom aderef aswap!]]))
+  (:require [audio-utils.util :refer [aatom aswap! aderef]]))
 
 (defprotocol IBufferSize
   (buffer-size [this]))
@@ -40,8 +40,8 @@
       (aget samples (aderef start))))
   (-pop [this]
     (when-not (= 0 (aderef length))
-      (aswap! start (mod (inc (aderef start)) (buffer-size this)))
-      (aswap! length (dec (aderef length))))
+      (aswap! start #(mod (inc %) (buffer-size this)))
+      (aswap! length dec))
     this)
 
   ICollection
@@ -49,14 +49,13 @@
     (if (>= (aderef length) (buffer-size this))
       (do
         (aset samples (aderef start) x)
-        (aswap! start (rem (inc (aderef start))
-                           (buffer-size this))))
+        (aswap! start #(rem (inc %) (buffer-size this))))
       (do
         (aset samples
               (rem (+ (aderef start) (aderef length))
                    (buffer-size this))
               x)
-        (aswap! length (inc (aderef length)))))
+        (aswap! length inc)))
     this)
 
   ISeqable

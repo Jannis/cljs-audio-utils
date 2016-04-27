@@ -6,9 +6,14 @@
   [x]
   (to-array [x]))
 
-(defn aswap!
+(defn areset!
   [x v]
   (aset x 0 v))
+
+(defn aswap!
+  [x f & args]
+  (let [v (aget x 0)]
+    (aset x 0 (apply f (into [v] args)))))
 
 (defn aderef
   [x]

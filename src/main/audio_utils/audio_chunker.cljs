@@ -1,5 +1,6 @@
 (ns audio-utils.audio-chunker
-  (:refer-clojure :exclude [flush]))
+  (:refer-clojure :exclude [flush])
+  (:require [audio-utils.util :as util]))
 
 (defprotocol IAudioChunker
   (connect-source [this source])
@@ -19,7 +20,7 @@
     (.disconnect node))
 
   (flush [this]
-    (doseq [[channel data] (map-indexed vector @buffers)]
+    (doseq [[channel data] (map-indexed vector (util/aderef buffers))]
       (if (> (.-length data) 0)
         (.deliver-chunk this channel data))))
 
@@ -29,13 +30,13 @@
       ((:on-chunk-ready config) channel (js->clj data))))
 
   (process-sample [this channel sample]
-    (let [buffer (doto (get @buffers channel)
+    (let [buffer (doto (get (util/aderef buffers) channel)
                    (.push sample))]
       (when (>= (.-length buffer) (:samples config))
         (do
           (.deliver-chunk this channel buffer)
-          (swap! buffers assoc channel #js []))
-        (swap! buffers assoc channel #js []))))
+          (util/aswap! buffers assoc channel #js []))
+        (util/aswap! buffers assoc channel #js []))))
 
   (process-audio [this event]
     (let [input-buffer  (.-inputBuffer event)
@@ -54,8 +55,8 @@
   (let [node    (.createScriptProcessor ctx 4096 1 1)
         chunker (map->AudioChunker {:config  config
                                     :node    node
-                                    :buffers (atom [#js []
-                                                    #js []])})]
+                                    :buffers (util/aatom [#js []
+                                                          #js []])})]
     (set! (.-onaudioprocess node)
           #(.process-audio chunker %))
     chunker))
