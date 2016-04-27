@@ -1,6 +1,8 @@
 (ns audio-utils.devcards.audio-chunker
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [devcards.core :refer-macros [defcard deftest dom-node]]
+            [goog.string :as gstring]
+            [goog.string.format]
             [sablono.core :refer-macros [html]]
             [audio-utils.audio-chunker :as c]
             [audio-utils.web-audio :as a]
@@ -12,26 +14,20 @@
 (defn run-test
   [state]
   (swap! state assoc :processing? true)
-  (let [ctx          (a/audio-context)
-        sample-rate  (.-sampleRate ctx)
-        input-data   ((:data-fn @state) sample-rate)
-        input-buffer (let [buffer (.createBuffer ctx 1
-                                                 (count input-data)
-                                                 sample-rate)
-                           data   (.getChannelData buffer 0)]
-                       (doseq [[i x] (map-indexed vector input-data)]
-                         (aset data i x))
-                       buffer)
-        source       (doto (.createBufferSource ctx)
-                       (aset "buffer" input-buffer))
-        chunks       #js []
-        chunker      (c/audio-chunker {:ctx     ctx
-                                       :samples 4410
-                                       :on-chunk-ready
-                                       (fn [channel chunk]
-                                         (when (= 0 channel)
-                                           (.push chunks chunk)))})
-        dest         (.createMediaStreamDestination ctx)]
+  (let [ctx         (a/audio-context)
+        sample-rate (.-sampleRate ctx)
+        input-data  ((:data-fn @state) sample-rate)
+        chunk-size  (:chunk-size @state)
+        source      (a/create-buffer-source ctx 1 sample-rate
+                                            input-data)
+        chunks      #js []
+        chunker     (c/audio-chunker {:ctx     ctx
+                                      :samples chunk-size
+                                      :on-chunk-ready
+                                      (fn [channel chunk]
+                                        (when (= 0 channel)
+                                          (.push chunks chunk)))})
+        dest        (.createMediaStreamDestination ctx)]
     (c/connect-source chunker source)
     (c/connect-destination chunker dest)
     (set! (.-onended source)
@@ -46,24 +42,26 @@
                      :finished?   true
                      :sample-rate sample-rate
                      :input-data  input-data
-                     :chunks      (apply concat (js->clj chunks))))))
+                     :chunks      (js->clj chunks)))))
     (.start source)))
 
-(defn plot-chunker-test
+(defn chunker-test
   [state]
   (let [{:keys [processing?
                 finished?
                 sample-rate
                 input-data
-                chunks]} @state]
+                chunks]} @state
+        combined-chunks  (apply concat chunks)]
     (cond
       finished?   (plot-buffers (count input-data)
-                                (str "Input Data "
-                                     "(" (count input-data) " samples)")
+                                (gstring/format "Input Data (%d samples)"
+                                                (count input-data))
                                 input-data
-                                (str "Concatenated Chunks "
-                                     "(" (count chunks) " samples)")
-                                chunks)
+                                (gstring/format "%d Chunks (%d samples)"
+                                                (count chunks)
+                                                (count combined-chunks))
+                                combined-chunks)
       processing? (html [:p "Processing..."])
       :else       (html [:button {:on-click #(run-test state)}
                          "Run test"]))))
@@ -75,13 +73,10 @@
    concatenating all chunks, which, if the audio chunker works correctly,
    should be exactly the same."
   (fn [state owner]
-    (plot-chunker-test state))
-  {:processing? false
-   :finished?   false
-   :chunk-size  4410
+    (chunker-test state))
+  {:chunk-size  4410
    :chunks      []
    :input-data  []
-   :sample-rate 0
    :data-fn     (fn [sample-rate]
                   (linear-distribution [-1.0 1.0] 32768))})
 
@@ -92,12 +87,9 @@
    result of concatenating all chunks, which, if the audio chunker
    works correctly, should be exactly the same."
   (fn [state owner]
-    (plot-chunker-test state))
-  {:processing? false
-   :finished?   false
-   :chunk-size  1000
+    (chunker-test state))
+  {:chunk-size  1000
    :chunks      []
    :input-data  []
-   :sample-rate 0
    :data-fn     (fn [sample-rate]
                   (sine-wave 10 sample-rate 32768))})
