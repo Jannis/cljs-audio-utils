@@ -1,8 +1,9 @@
 (ns audio-utils.web-audio)
 
 (defn audio-context []
-  (or (new js/window.AudioContext)
-      (new js/window.webkitAudioContext)))
+  (let [constructor (or js/window.AudioContext
+                        js/window.webkitAudioContext)]
+    (constructor.)))
 
 (defn create-buffer
   [ctx n-channels size sample-rate]

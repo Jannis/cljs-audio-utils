@@ -19,21 +19,6 @@
   [x]
   (aget x 0))
 
-;;;; Web audio polyfills
-
-(defn audio-context []
-  (let [constructor (or js/window.AudioContext
-                        js/window.webkitAudioContext)]
-    (constructor.)))
-
-(defn get-user-media
-  [constraints cb log]
-  (let [media-fn (or js/navigator.getUserMedia
-                     js/navigator.webkitGetUserMedia
-                     js/navigator.mozGetUserMedia
-                     js/navigator.msGetUserMedia)]
-    ((.bind media-fn js/navigator) (clj->js constraints) cb log)))
-
 ;;;; Time/samples and dB/amplitude conversion
 
 (defn db->amplitude
