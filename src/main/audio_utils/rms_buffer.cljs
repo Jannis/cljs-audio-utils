@@ -1,4 +1,5 @@
-(ns audio-utils.rms-buffer)
+(ns audio-utils.rms-buffer
+  (:require [audio-utils.ring-buffer :as rb]))
 
 (defprotocol IRMSBuffer
   "Interface for implementations of RMS volume computation buffers."
@@ -12,7 +13,7 @@
   (rms-push [this sample]
     (let [n-samples (count samples)
           oldest    (if (>= n-samples size)
-                      (first samples)
+                      (peek samples)
                       0)]
       (-> this
           ;; Add the new sample at the end and drop the oldest
@@ -20,7 +21,7 @@
           ;; has been reached
           (assoc :samples
                  (conj (cond-> samples
-                         (>= n-samples size) (subvec 1))
+                         (>= n-samples size) pop)
                        sample))
           ;; Update the sum of squares: x_1² + x_2² + ... + x_n²
           ;; by removing the oldest sample square (if present)
@@ -50,5 +51,5 @@
   "Allocates a new buffer for RMS computations"
   [size]
   (map->RMSBuffer {:size        size
-                   :samples     []
+                   :samples     (rb/ring-buffer size)
                    :squared-sum 0}))

@@ -11,7 +11,8 @@
                   next-val (rms/rms rms-buf)]
               {:rms-buf     next-buf
                :rms-values  (conj rms-values next-val)
-               :rms-samples (conj rms-samples (:samples next-buf))}))
+               :rms-samples (conj rms-samples
+                                  (into [] (:samples next-buf)))}))
           {:rms-buf         (rms-buffer rms-size)
            :rms-values      []
            :rms-samples     []}
