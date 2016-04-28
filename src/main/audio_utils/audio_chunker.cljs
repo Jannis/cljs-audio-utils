@@ -51,8 +51,16 @@
             (.process-sample this channel sample-val)))))))
 
 (defn audio-chunker
-  [{:keys [ctx samples on-chunk-ready] :as config}]
-  (let [node    (.createScriptProcessor ctx 4096 1 1)
+  [{:keys [ctx
+           buffer-size
+           samples
+           on-chunk-ready]
+    :or   {buffer-size 4096
+           samples     4410}}]
+  (let [node    (.createScriptProcessor ctx buffer-size 1 1)
+        config  {:ctx            ctx
+                 :samples        samples
+                 :on-chunk-ready on-chunk-ready}
         chunker (map->AudioChunker {:config  config
                                     :node    node
                                     :buffers (util/aatom [#js []
