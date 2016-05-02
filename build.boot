@@ -62,7 +62,8 @@
   []
   (comp
    (watch)
-   (reload :on-jsload 'audio-utils.devcards.core/reload)
+   (reload :ids       #{"devcards"}
+           :on-jsload 'audio-utils.devcards.core/reload)
    (build-dev)
    (serve)))
 
