@@ -4,7 +4,7 @@
             [audio-utils.devcards.ring-buffer]
             [audio-utils.devcards.rms-buffer]
             [audio-utils.devcards.gate]
-            [audio-utils.devcards.audio-chunker]
+            [audio-utils.devcards.chunker]
             [audio-utils.devcards.audio-encoder]))
 
 (enable-console-print!)
