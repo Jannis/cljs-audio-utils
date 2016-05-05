@@ -1,4 +1,4 @@
-(ns audio-utils.devcards.workers.gate-1
+(ns audio-utils.devcards.workers.gate-2
   (:require [audio-utils.gate :as g]
             [audio-utils.worker :as w]))
 
@@ -9,7 +9,7 @@
                             :buffer-size 4096
                             :look-ahead  0
                             :hold        0
-                            :rms-window  0})
+                            :rms-window  100})
         exit-node  (w/worker-exit-node)]
     (w/connect entry-node gate)
     (w/connect gate exit-node)))
