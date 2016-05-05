@@ -2,7 +2,7 @@
   (:require [devcards.core :refer-macros [defcard deftest dom-node]]
             [audio-utils.rms-buffer :as rms :refer [rms-buffer]]
             [audio-utils.viz :refer [linear-distribution
-                                     plot-buffers]]))
+                                     plot-buffers sine-wave]]))
 
 (defn run-rms
   [rms-size samples]
@@ -32,7 +32,7 @@
    input consists entirely of zeros, all RMS values are 0.0."
   (let [data       (repeat 500 0.0)
         rms-values (compute-rms-values 100 data)]
-    (plot-buffers 500 "Input" data "RMS Values" rms-values)))
+    (plot-buffers 500 100 "Input" data "RMS Values" rms-values)))
 
 (defcard
   "500 -1.0s along with RMS values calculated after adding each
@@ -41,7 +41,7 @@
    RMS values are all 1.0."
   (let [data       (repeat 500 -1.0)
         rms-values (compute-rms-values 100 data)]
-    (plot-buffers 500 "Input" data "RMS Values" rms-values)))
+    (plot-buffers 500 100 "Input" data "RMS Values" rms-values)))
 
 (defcard
   "250 -1.0s and 250 1.0s along with RMS values calculated after
@@ -51,7 +51,7 @@
   (let [data       (concat (repeat 250 -1.0)
                            (repeat 250 1.0))
         rms-values (compute-rms-values 100 data)]
-    (plot-buffers 500 "Input" data "RMS Values" rms-values)))
+    (plot-buffers 500 100 "Input" data "RMS Values" rms-values)))
 
 (defcard
   "500 0.0s and 500 1.0s along with RMS values calculated after
@@ -61,7 +61,7 @@
    "
   (let [data       (concat (repeat 500 0.0) (repeat 500 1.0))
         rms-values (compute-rms-values 100 data)]
-    (plot-buffers 1000 "Input" data "RMS Values" rms-values)))
+    (plot-buffers 1000 250 "Input" data "RMS Values" rms-values)))
 
 (defcard
   "500 0.0s and 500 1.0s along with RMS values calculated after
@@ -70,7 +70,7 @@
    value also reaches 1.0."
   (let [data       (concat (repeat 500 0.0) (repeat 500 1.0))
         rms-values (compute-rms-values 250 data)]
-    (plot-buffers 1000 "Input" data "RMS Values" rms-values)))
+    (plot-buffers 1000 250 "Input" data "RMS Values" rms-values)))
 
 (defcard
   "500 zeros, 250 ones and 500 zeros along with RMS values
@@ -82,7 +82,7 @@
                            (repeat 250 1.0)
                            (repeat 500 0.0))
         rms-values (compute-rms-values 250 data)]
-    (plot-buffers 1250 "Input" data "RMS Values" rms-values)))
+    (plot-buffers 1250 250 "Input" data "RMS Values" rms-values)))
 
 (defcard
   "500 zeros, 250 -1.0s and 500 zeros along with RMS values
@@ -93,7 +93,7 @@
                            (repeat 250 -1.0)
                            (repeat 500 0.0))
         rms-values (compute-rms-values 250 data)]
-    (plot-buffers 1250 "Input" data "RMS Values" rms-values)))
+    (plot-buffers 1250 250 "Input" data "RMS Values" rms-values)))
 
 (defcard
   "500 zeros, 100 1.0s and 1400 zeros along with RMS values
@@ -114,7 +114,20 @@
         rms-values  (compute-rms-values 1000 data)
         rms-samples (map (comp #(/ % 1000) count)
                          (compute-rms-samples 1000 data))]
-    (plot-buffers 2000
+    (plot-buffers 2000 250
+                  "Input" data
+                  "RMS Values" rms-values
+                  "RMS Buffer Fill %" rms-samples)))
+
+(defcard
+  "500 samples of a 10Hz sine wave at a sample rate of 1000, with
+   an RMS window size of 25 samples. The plot compares the input
+   signal with calculated RMS volume after every sample."
+  (let [data        (sine-wave 10 1000 500)
+        rms-values  (compute-rms-values 25 data)
+        rms-samples (map (comp #(/ % 25) count)
+                         (compute-rms-samples 25 data))]
+    (plot-buffers 500 250
                   "Input" data
                   "RMS Values" rms-values
                   "RMS Buffer Fill %" rms-samples)))

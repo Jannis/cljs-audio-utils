@@ -59,7 +59,7 @@
                 input-data
                 output-data]} @state]
     (cond
-      finished?   (plot-buffers (count input-data)
+      finished?   (plot-buffers (count input-data) 5000
                                 (gstring/format "Input (%d samples)"
                                                 (count input-data))
                                 input-data

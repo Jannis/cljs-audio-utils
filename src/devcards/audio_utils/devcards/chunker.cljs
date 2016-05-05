@@ -58,7 +58,7 @@
                 chunks]} @state
         combined-chunks  (apply concat chunks)]
     (cond
-      finished?   (plot-buffers (count input-data)
+      finished?   (plot-buffers (count input-data) 2000
                                 (gstring/format "Input Data (%d samples)"
                                                 (count input-data))
                                 input-data
