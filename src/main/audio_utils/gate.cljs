@@ -21,9 +21,13 @@
 ;;                            (rms/rms-buffer rms-samples)))))
 
 (defprotocol IGate
-  (generate-output-sample [this channel input-sample]))
+  (generate-output-sample [this channel input-sample])
+  (add-to-rms [this channel sample])
+  (calculate-rms [this channel])
+  (queue-in-buffer [this channel sample])
+  (dequeue-from-buffer [this channel]))
 
-(defrecord Gate [config next rms-buffers]
+(defrecord Gate [config next buffers rms-buffers]
   w/IWorkerAudioNode
   (connect [this destination]
     (reset! next destination))
@@ -45,16 +49,45 @@
 
   IGate
   (generate-output-sample [this channel input-sample]
-    (if (>= (Math/abs input-sample)
-            (db->amplitude (:threshold config)))
-      input-sample
-      0.0)))
+    (queue-in-buffer this channel input-sample)
+    (add-to-rms this channel input-sample)
+    (let [threshold (db->amplitude (:threshold config))]
+      (if (>= (calculate-rms this channel) threshold)
+        (dequeue-from-buffer this channel)
+        0.0)))
+
+  (add-to-rms [this channel sample]
+    (aswap! rms-buffers update channel
+            (fn [buffer]
+              (let [window (max (time->samples (:rms-window config)
+                                               (:sample-rate config))
+                                2)
+                    buffer (or buffer (rms/rms-buffer window))]
+                (rms/rms-push buffer sample)))))
+
+  (calculate-rms [this channel]
+    (rms/rms ((aderef rms-buffers) channel)))
+
+  (queue-in-buffer [this channel sample]
+    (aswap! buffers update channel
+            (fn [buffer]
+              (let [size   (max (time->samples (:look-ahead config)
+                                               (:sample-rate config))
+                                2)
+                    buffer (or buffer (rb/ring-buffer size))]
+                (conj buffer sample)))))
+
+  (dequeue-from-buffer [this channel]
+    (let [buffer ((aderef buffers) channel)
+          sample (peek buffer)]
+      (pop buffer)
+      sample)))
 
 (defn default-trigger
   [gate state])
 
 (defn gate
-  [{:keys [ctx
+  [{:keys [sample-rate
            buffer-size
            threshold
            look-ahead
@@ -67,12 +100,13 @@
            hold        100
            rms-window  100
            trigger     default-trigger}}]
-  (let [config {:ctx        ctx
-                :threshold  threshold
-                :look-ahead look-ahead
-                :hold       hold
-                :rms-window rms-window
-                :trigger    trigger}]
+  (let [config {:sample-rate sample-rate
+                :threshold   threshold
+                :look-ahead  look-ahead
+                :hold        hold
+                :rms-window  rms-window
+                :trigger     trigger}]
     (map->Gate {:config      config
                 :next        (atom nil)
-                :rms-buffers (aatom [])})))
+                :buffers     (aatom {})
+                :rms-buffers (aatom {})})))
