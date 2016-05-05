@@ -38,3 +38,14 @@
    samples given a sample rate."
   [x sample-rate]
   (long (* (/ x 1000) sample-rate)))
+
+(defn amplify-sample
+  "Amplifies or attentuates a sample by a given amount of dB."
+  [sample db]
+  (* sample (db->amplitude db)))
+
+(defn amplify
+  "Amplifies all samples in the input collection by a given amount
+   of dB."
+  [coll db]
+  (map #(amplify-sample % db) coll))
