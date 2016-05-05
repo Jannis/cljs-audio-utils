@@ -19,6 +19,9 @@
   [x]
   (aget x 0))
 
+(def << aderef)
+(def >> areset!)
+
 ;;;; Time/samples and dB/amplitude conversion
 
 (defn db->amplitude
