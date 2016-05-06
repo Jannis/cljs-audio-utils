@@ -41,6 +41,7 @@
               (<! (timeout 1000))
               (.disconnect entry-node)
               (.terminate worker)
+              (.close ctx)
               (swap! state assoc
                      :processing? false
                      :finished?   true
