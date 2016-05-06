@@ -183,8 +183,8 @@
    Compared to the example without look-ahead, this configuration
    clearly shows how the rise in volume is captured instead of being
    cut off. A minor trade-off that becomes apparent at the same time
-   is that a small window of samples below the threshold also make it
-   through the gate."
+   is that a small window of samples below the threshold also makes
+   it through the gate."
   (fn [state owner]
     (gate-test state))
   {:worker  "gate-3.js"
@@ -204,8 +204,8 @@
    Compared to the example without look-ahead, this configuration
    clearly shows how the rise in volume is captured instead of being
    cut off. A minor trade-off that becomes apparent at the same time
-   is that a small window of samples below the threshold also make it
-   through the gate."
+   is that a small window of samples below the threshold also makes
+   it through the gate."
   (fn [state owner]
     (gate-test state))
   {:worker  "gate-3.js"
