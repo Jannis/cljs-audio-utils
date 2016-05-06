@@ -80,11 +80,10 @@
   "## Peak level detection (no RMS)")
 
 (defcard
-  "A look-ahead gate, fed with a stream of 11025 samples of -20dB
-   sine wave, 1000 samples of a sine wave at -10dB and 21050 samples
-   of a sine wave at -11dB. The gate parameters are: threshold -16dB,
-   look-ahead 0ms (disabled), hold 0ms (disabled), RMS window 0ms
-   (disabled).
+  "A look-ahead gate, fed with a stream of 11025 samples at -20dB,
+   1000 samples at -10dB, and 21050 samples at -11dB. The gate
+   parameters are: threshold -16dB, look-ahead 0ms (disabled),
+   hold 0ms (disabled), RMS window 0ms (disabled).
 
    With the RMS window being set to 0ms, the gate effectively uses
    peak level detection. The output plot demonstrates that the gate
@@ -102,7 +101,7 @@
                             (repeat (/ 21050 2) (db->amplitude -11)))))})
 
 (defcard
-  "A look-ahead gate, fed with a stream of 11025 samples of -20dB
+  "A look-ahead gate, fed with a stream of 11025 samples of a -20dB
    sine wave, 1000 samples of a sine wave at -10dB and 21050 samples
    of a sine wave at -11dB. The gate parameters are: threshold -16dB,
    look-ahead 0ms (disabled), hold 0ms (disabled), RMS window 0ms
@@ -176,10 +175,10 @@
   "## RMS with look-ahead")
 
 (defcard
-  "A look-ahead gate, fed with a stream of 11025 samples of a -20dB
-   sine wave, 1000 samples of a -10dB sine wave and 21050 samples
-   of a -11dB sine wave. The gate parameters are: threshold -16dB,
-   look-ahead 100ms, hold 0ms (disabled), RMS window 100ms.
+  "A look-ahead gate, fed with a stream of 11025 samples at -20dB,
+   1000 samples at -10dB, and 21050 samples at -11dB. The gate
+   parameters are: threshold -16dB, look-ahead 0ms (disabled),
+   hold 0ms (disabled), RMS window 0ms (disabled).
 
    Compared to the example without look-ahead, this configuration
    clearly shows how the rise in volume is captured instead of being
@@ -197,7 +196,7 @@
                    (repeat (/ 21050 2) (db->amplitude -11)))))})
 
 (defcard
-  "A look-ahead gate, fed with a stream of 11025 samples of -20dB
+  "A look-ahead gate, fed with a stream of 11025 samples of a -20dB
    sine wave, 1000 samples of a -10dB sine wave and 21050 samples
    of a -11dB sine wave. The gate parameters are: threshold -16dB,
    look-ahead 100ms, hold 0ms (disabled), RMS window 100ms.
@@ -222,16 +221,13 @@
   "## No hold time")
 
 (defcard
-  "A look-ahead gate, fed with a stream of 11025 samples of a -20dB
-   sine wave, 1000 samples of a -10dB sine wave and 21050 samples
-   of a -11dB sine wave. The gate parameters are: threshold -16dB,
-   look-ahead 100ms, hold 0ms (disabled), RMS window 100ms.
+  "A look-ahead gate, fed with a stream of 11025 samples at -20dB,
+   1000 samples at -10dB, and 21050 samples at -11dB. The gate
+   parameters are: threshold -16dB, look-ahead 0ms (disabled),
+   hold 0ms (disabled), RMS window 0ms (disabled).
 
-   Compared to the example without look-ahead, this configuration
-   clearly shows how the rise in volume is captured instead of being
-   cut off. A minor trade-off that becomes apparent at the same time
-   is that a small window of samples below the threshold also make it
-   through the gate."
+   With this configuration, the gate closes as soon as the level
+   drops below the threshold of -16dB."
   (fn [state owner]
     (gate-test state))
   {:worker  "gate-4.js"
@@ -242,16 +238,13 @@
                    (repeat (/ 22050 2) (db->amplitude -20)))))})
 
 (defcard
-  "A look-ahead gate, fed with a stream of 11025 samples of -20dB
+  "A look-ahead gate, fed with a stream of 11025 samples of a -20dB
    sine wave, 1000 samples of a -10dB sine wave and 21050 samples
    of a -11dB sine wave. The gate parameters are: threshold -16dB,
-   look-ahead 100ms, hold 0ms (disabled), RMS window 100ms.
+   look-ahead 0ms (disabled), hold 0ms (disabled), RMS window 100ms.
 
-   Compared to the example without look-ahead, this configuration
-   clearly shows how the rise in volume is captured instead of being
-   cut off. A minor trade-off that becomes apparent at the same time
-   is that a small window of samples below the threshold also make it
-   through the gate."
+   With this configuration, the gate closes as soon as the sine
+   wave's RMS level drops below the threshold."
   (fn [state owner]
     (gate-test state))
   {:worker  "gate-5.js"
@@ -266,16 +259,15 @@
   "## Hold time")
 
 (defcard
-  "A look-ahead gate, fed with a stream of 11025 samples of a -20dB
-   sine wave, 1000 samples of a -10dB sine wave and 21050 samples
-   of a -11dB sine wave. The gate parameters are: threshold -16dB,
-   look-ahead 100ms, hold 0ms (disabled), RMS window 100ms.
+  "A look-ahead gate, fed with a stream of 11025 samples at -20dB,
+   1000 samples at -10dB, and 21050 samples at -11dB. The gate
+   parameters are: threshold -16dB, look-ahead 0ms (disabled),
+   hold 100ms, RMS window 0ms (disabled).
 
-   Compared to the example without look-ahead, this configuration
-   clearly shows how the rise in volume is captured instead of being
-   cut off. A minor trade-off that becomes apparent at the same time
-   is that a small window of samples below the threshold also make it
-   through the gate."
+   Compared to the previous examples with the hold time disabled,
+   this configuration demonstrates how the gate remains open for
+   100ms (4410 samples) after the input level has dropped below the
+   threshold."
   (fn [state owner]
     (gate-test state))
   {:worker  "gate-6.js"
@@ -286,16 +278,15 @@
                    (repeat (/ 22050 2) (db->amplitude -20)))))})
 
 (defcard
-  "A look-ahead gate, fed with a stream of 11025 samples of -20dB
+  "A look-ahead gate, fed with a stream of 11025 samples of a -20dB
    sine wave, 1000 samples of a -10dB sine wave and 21050 samples
    of a -11dB sine wave. The gate parameters are: threshold -16dB,
-   look-ahead 100ms, hold 0ms (disabled), RMS window 100ms.
+   look-ahead 0ms (disabled), hold 100ms, RMS window 100ms.
 
-   Compared to the example without look-ahead, this configuration
-   clearly shows how the rise in volume is captured instead of being
-   cut off. A minor trade-off that becomes apparent at the same time
-   is that a small window of samples below the threshold also make it
-   through the gate."
+   Compared to the previous examples with the hold time disabled,
+   this configuration demonstrates how the gate remains open for
+   100ms (4410 samples) after the RMS level of the sine wave has
+   dropped below the threshold."
   (fn [state owner]
     (gate-test state))
   {:worker  "gate-7.js"
