@@ -9,7 +9,7 @@ tmpdir=$(mktemp -d)
 cp -R target/public/.* "$tmpdir"
 
 # Switch to the gh-pages branch
-git checkout -b gh-pages
+git checkout gh-pages
 
 # Remove the old sources
 git rm -rf *.html *.js *.js.map *.cljs.edn *.cljs *.out
