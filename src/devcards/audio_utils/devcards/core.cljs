@@ -5,7 +5,7 @@
             [audio-utils.devcards.rms-buffer]
             [audio-utils.devcards.gate]
             [audio-utils.devcards.chunker]
-            [audio-utils.devcards.audio-encoder]))
+            [audio-utils.devcards.mp3-encoder]))
 
 (enable-console-print!)
 
