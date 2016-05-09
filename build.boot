@@ -14,6 +14,9 @@
                  ;; Language libraries
                  [org.clojure/clojurescript "1.7.228"]
 
+                 ;; Other dependencies
+                 [cljsjs/lamejs "1.1.0-0"]
+
                  ;; Test app
                  [binaryage/devtools "0.5.2"]
                  [devcards "0.2.1-6"]
