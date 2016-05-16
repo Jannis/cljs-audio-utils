@@ -11,11 +11,15 @@
     (reset! next nil))
 
   (process-audio [this data]
-    (let [encoder (js/lamejs.Mp3Encoder. (count data) sample-rate
-                                         bit-rate)
-          samples (into-array (map into-array data))
-          encoded (.encodeBuffer encoder samples)]
-      (some-> @next (w/process-audio (js->clj encoded))))))
+    (let [int-data (mapv (fn [samples]
+                           (into-array (map #(* 32768 %) samples)))
+                         data)
+          encoder  (js/lamejs.Mp3Encoder. 2 sample-rate bit-rate)
+          encoded  #js []]
+      (doto encoded
+        (.push (apply (aget encoder "encodeBuffer") int-data))
+        (.push (.flush encoder)))
+      (some-> @next (w/process-audio encoded)))))
 
 (defn mp3-encoder
   [{:keys [bit-rate
