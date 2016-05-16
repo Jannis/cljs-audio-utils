@@ -31,8 +31,9 @@
                     (let [sample (aget input-data n)]
                       (aset output-data n sample)
                       (.push (aget worker-data channel) sample)))))
-              (.postMessage worker (clj->js {:name :worker-process-audio
-                                             :data worker-data})))))))
+              (.postMessage worker (doto #js []
+                                     (aset "name" "worker-process-audio")
+                                     (aset "data" worker-data))))))))
 
 (defn worker-entry-node
   "Creates an IWorkerAudioNode in a worker that receives its audio
@@ -51,11 +52,11 @@
                    (process-audio @next data))))]
     (set! (.-onmessage js/self)
           (fn [msg]
-            (let [clj-msg (js->clj (.-data msg))
-                  name    (keyword (clj-msg "name"))
-                  data    (clj-msg "data")]
-              (when (= name :worker-process-audio)
-                (process-audio node data)))))
+            (let [name     (aget (.-data msg) "name")
+                  data     (aget (.-data msg) "data")
+                  clj-data (js->clj data)]
+              (when (= name "worker-process-audio")
+                (process-audio node clj-data)))))
     node))
 
 (defn worker-exit-node
@@ -67,16 +68,16 @@
     (connect [this destination])
     (disconnect [this])
     (process-audio [this data]
-      (.postMessage js/self (clj->js {:name :main-process-audio
-                                      :data data})))))
+      (.postMessage js/self (doto #js {}
+                              (aset "name" "main-process-audio")
+                              (aset "data" data))))))
 
 (defn main-exit-node
   [worker data-fn]
   (set! (.-onmessage worker)
         (fn [msg]
-          (let [clj-msg (js->clj (.-data msg))
-                name    (keyword (clj-msg "name"))
-                data    (clj-msg "data")]
-            (when (= name :main-process-audio)
+          (let [name    (aget (.-data msg) "name")
+                data    (aget (.-data msg) "data")]
+            (when (= name "main-process-audio")
               (when data-fn
                 (data-fn data)))))))
