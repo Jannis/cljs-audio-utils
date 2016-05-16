@@ -1,0 +1,3 @@
+{:require  [audio-utils.devcards.workers.mp3-encoder-1]
+ :init-fns [audio-utils.devcards.workers.mp3-encoder-1/init]
+ :compiler-options {:optimizations :simple}}
