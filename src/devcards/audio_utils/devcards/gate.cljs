@@ -1,6 +1,7 @@
 (ns audio-utils.devcards.gate
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [devcards.core :refer-macros [defcard
+  (:require [cljs.core.async :refer [<! timeout]]
+            [devcards.core :refer-macros [defcard
                                           defcard-doc
                                           deftest
                                           dom-node]]
@@ -14,8 +15,7 @@
                                      plot-buffers
                                      sine-wave]]
             [audio-utils.web-audio :as a]
-            [audio-utils.worker :as w]
-            [cljs.core.async :refer [<! timeout]]))
+            [audio-utils.worker :as w]))
 
 (defn run-test
   [state]
