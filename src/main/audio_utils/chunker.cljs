@@ -15,10 +15,10 @@
     (reset! next nil))
 
   (process-audio [this data]
-    (let [n-samples  (count (first data))
-          n-channels (count data)]
+    (let [n-channels (count data)
+          n-samples  (count (first data))]
       (dotimes [n n-samples]
-        (let [samples (mapv #((data %) n) (range 0 n-channels))]
+        (let [samples (mapv #(nth % n) data)]
           (process-samples this samples)))))
 
   IChunker
@@ -42,4 +42,4 @@
     :or {samples-per-chunk 4410}}]
   (map->Chunker {:samples-per-chunk samples-per-chunk
                  :next              (atom nil)
-                 :chunks            (atom [[] []])}))
+                 :chunks            (atom [])}))
