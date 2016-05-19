@@ -5,21 +5,6 @@
                                       db->amplitude time->samples]]
             [audio-utils.worker :as w]))
 
-;;sample-rate        (.-sampleRate ctx)
-;;threshold'         (db->amplitude threshold)
-;;rms-samples        (max 1 (time->samples rms-window sample-rate))
-;;rms-buffers        (aatom [])
-;;hold-samples       (time->samples hold sample-rate)
-;;look-ahead-samples (max 1 (time->samples look-ahead sample-rate))
-;;look-ahead-buffer  (rb/ring-buffer look-ahead-samples)
-
-;;(let [sample-rate (.-sampleRate (:ctx config))
-;;      rms-window  (:rms-window config)
-;;      rms-samples (max 1 (time->samples rms-window sample-rate))]
-;;  (areset! rms-buffers
-;;           (into [] (repeat (.-channelCount source)
-;;                            (rms/rms-buffer rms-samples)))))
-
 (defprotocol IGate
   (generate-output-sample [this channel input-sample])
   (add-to-rms [this channel sample])
@@ -36,8 +21,8 @@
     (reset! next nil))
 
   (process-audio [this data]
-    (let [n-samples  (count (first data))
-          n-channels (count data)
+    (let [n-channels (count data)
+          n-samples  (count (first data))
           output     (volatile! (into [] (repeat n-channels [])))]
       (dotimes [n n-samples]
         (dotimes [channel n-channels]
