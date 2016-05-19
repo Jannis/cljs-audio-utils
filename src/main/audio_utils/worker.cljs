@@ -23,17 +23,28 @@
             (let [input-buffer  (.-inputBuffer event)
                   output-buffer (.-outputBuffer event)
                   n-channels    (.-numberOfChannels input-buffer)
-                  worker-data   (into-array (repeat n-channels #js []))]
+                  worker-buffer (.createBuffer ctx n-channels
+                                               (.-length input-buffer)
+                                               (.-sampleRate ctx))]
               (dotimes [channel n-channels]
                 (let [input-data  (.getChannelData input-buffer channel)
-                      output-data (.getChannelData output-buffer channel)]
+                      output-data (.getChannelData output-buffer channel)
+                      worker-data (.getChannelData worker-buffer channel)]
                   (dotimes [n (.-length input-data)]
                     (let [sample (aget input-data n)]
                       (aset output-data n sample)
-                      (.push (aget worker-data channel) sample)))))
-              (.postMessage worker (doto #js []
-                                     (aset "name" "worker-process-audio")
-                                     (aset "data" worker-data))))))))
+                      (aset worker-data n sample)))))
+              (let [data          (->> (range 0 n-channels)
+                                       (map #(.getChannelData
+                                              worker-buffer %))
+                                       (into-array))
+                    transferables (->> (array-seq data)
+                                       (map #(.-buffer %))
+                                       (into-array))
+                    msg-data      (doto #js []
+                                    (aset "name" "worker-process-audio")
+                                    (aset "data" data))]
+                (.postMessage worker msg-data transferables)))))))
 
 (defn worker-entry-node
   "Creates an IWorkerAudioNode in a worker that receives its audio
@@ -54,7 +65,8 @@
           (fn [msg]
             (let [name     (aget (.-data msg) "name")
                   data     (aget (.-data msg) "data")
-                  clj-data (js->clj data)]
+                  clj-data (mapv #(into [] (array-seq %))
+                                 (array-seq data))]
               (when (= name "worker-process-audio")
                 (process-audio node clj-data)))))
     node))
@@ -68,7 +80,7 @@
     (connect [this destination])
     (disconnect [this])
     (process-audio [this data]
-      (.postMessage js/self (doto #js {}
+      (.postMessage js/self (doto #js []
                               (aset "name" "main-process-audio")
                               (aset "data" data))))))
 
