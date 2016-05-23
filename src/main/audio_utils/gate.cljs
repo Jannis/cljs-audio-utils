@@ -10,9 +10,10 @@
   (add-to-rms [this channel sample])
   (calculate-rms [this channel])
   (queue-in-buffer [this channel sample])
-  (dequeue-from-buffer [this channel]))
+  (dequeue-from-buffer [this channel])
+  (maybe-toggle-gate [this state]))
 
-(defrecord Gate [config next buffers rms-buffers samples-held]
+(defrecord Gate [config next buffers rms-buffers samples-held state]
   w/IWorkerAudioNode
   (connect [this destination]
     (reset! next destination))
@@ -41,12 +42,16 @@
       (if (>= (calculate-rms this channel) threshold)
         (do
           (>> samples-held 0)
+          (maybe-toggle-gate this :open)
           (dequeue-from-buffer this channel))
         (if (<= (<< samples-held) hold)
           (do
             (aswap! samples-held inc)
+            (maybe-toggle-gate this :open)
             input-sample)
-          0.0))))
+          (do
+            (maybe-toggle-gate this :closed)
+            0.0)))))
 
   (add-to-rms [this channel sample]
     (aswap! rms-buffers update channel
@@ -71,7 +76,13 @@
     (let [buffer ((<< buffers) channel)
           sample (peek buffer)]
       (pop buffer)
-      sample)))
+      sample))
+
+  (maybe-toggle-gate [this new-state]
+    (when (not= (<< state) new-state)
+      (>> state new-state)
+      (when (:trigger config)
+        ((:trigger config) new-state)))))
 
 (defn default-trigger
   [gate state])
@@ -100,4 +111,5 @@
                 :next         (atom nil)
                 :buffers      (aatom {})
                 :rms-buffers  (aatom {})
-                :samples-held (aatom 0)})))
+                :samples-held (aatom 0)
+                :state        (aatom :closed)})))
