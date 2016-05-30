@@ -44,7 +44,8 @@
           (>> samples-held 0)
           (maybe-toggle-gate this :open)
           (dequeue-from-buffer this channel))
-        (if (<= (<< samples-held) hold)
+        (if (and (= (<< state) :open)
+                 (< (<< samples-held) hold))
           (do
             (aswap! samples-held inc)
             (maybe-toggle-gate this :open)
