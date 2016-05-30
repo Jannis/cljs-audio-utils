@@ -113,7 +113,7 @@
 (defn run-test
   [state]
   (swap! state assoc :processing? true)
-  (let [{:keys [source worker samples-per-mp3]} @state]
+  (let [{:keys [data-fn source worker samples-per-mp3]} @state]
     (letfn [(encode-audio-data [ctx buffer]
               (let [n-channels (.-numberOfChannels buffer)
                     source     (doto (a/create-buffer-source ctx)
@@ -155,13 +155,23 @@
                 (doto ctx
                   (.decodeAudioData data
                                     (partial encode-audio-data ctx)
-                                    (partial log-error ctx)))))]
-      (let [req (js/XMLHttpRequest.)]
-        (doto req
-          (.open "GET" (str "/" source) true)
-          (aset "responseType" "arraybuffer")
-          (aset "onload" #(load-file (.-response req)))
-          (.send))))))
+                                    (partial log-error ctx)))))
+            (load-data []
+              (let [ctx         (a/audio-context)
+                    sample-rate (.-sampleRate ctx)
+                    data        (data-fn sample-rate)
+                    buf         (a/create-buffer-from-data ctx 1
+                                                           sample-rate
+                                                           data)]
+                (encode-audio-data ctx buf)))]
+      (cond
+        source  (let [req (js/XMLHttpRequest.)]
+                  (doto req
+                    (.open "GET" (str "/" source) true)
+                    (aset "responseType" "arraybuffer")
+                    (aset "onload" #(load-file (.-response req)))
+                    (.send)))
+        data-fn (load-data)))))
 
 (defn encoder-test
   [state]
@@ -180,3 +190,18 @@
     (encoder-test state))
   {:worker "mp3-encoder-1.js"
    :source "public/viper.ogg"})
+
+(defcard
+  ""
+  (fn [state owner]
+    (encoder-test state))
+  {:worker "mp3-encoder-2.js"
+   :data-fn
+   (fn [sample-rate]
+     (let [sines (sine-wave 1000 sample-rate 441000)]
+       (into []
+             (concat (amplify (take 88200 sines) -30)
+                     (amplify (take 88200 sines) -3)
+                     (amplify (take 88200 sines) -30)
+                     (amplify (take 88200 sines) -6)
+                     (amplify (take 88200 sines) -30)))))})
