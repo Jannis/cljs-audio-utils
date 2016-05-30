@@ -49,9 +49,11 @@
           (do
             (aswap! samples-held inc)
             (maybe-toggle-gate this :open)
+            (dequeue-from-buffer this channel)
             input-sample)
           (do
             (maybe-toggle-gate this :closed)
+            (dequeue-from-buffer this channel)
             0.0)))))
 
   (add-to-rms [this channel sample]
