@@ -14,7 +14,8 @@
     (let [int-data (mapv (fn [samples]
                            (into-array (map #(* 32768 %) samples)))
                          data)
-          encoder  (js/lamejs.Mp3Encoder. 2 sample-rate bit-rate)
+          encoder  (js/lamejs.Mp3Encoder. (count data) sample-rate
+                                          bit-rate)
           encoded  #js []]
       (doto encoded
         (.push (apply (aget encoder "encodeBuffer") int-data))
