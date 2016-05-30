@@ -4,6 +4,8 @@
   (:require [cljs.core.async :refer [<! timeout]]
             [devcards.core :refer-macros [defcard defcard-doc]]
             [sablono.core :refer-macros [html]]
+            [audio-utils.util :refer [amplify]]
+            [audio-utils.viz :refer [sine-wave]]
             [audio-utils.web-audio :as a]
             [audio-utils.worker :as w]))
 
@@ -67,8 +69,9 @@
 (defn concat-buffers
   [ctx buffers]
   (let [total-length (transduce (map #(.-length %)) + 0 buffers)
-        buffer (a/create-buffer ctx 2 total-length
-                                (.-sampleRate ctx))]
+        n-channels   (.-numberOfChannels (first buffers))
+        buffer       (a/create-buffer ctx n-channels total-length
+                                      (.-sampleRate ctx))]
     (reduce (fn [length-so-far buf]
               (doseq [channel (range 0 (.-numberOfChannels buffer))]
                 (let [in-chan  (.getChannelData buf channel)
