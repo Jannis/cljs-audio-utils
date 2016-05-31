@@ -80,16 +80,23 @@
     (connect [this destination])
     (disconnect [this])
     (process-audio [this data]
-      (.postMessage js/self (doto #js []
-                              (aset "name" "main-process-audio")
-                              (aset "data" data))))))
+      (let [convert? (not (array? data))]
+        (.postMessage js/self (doto #js []
+                                (aset "name" "main-process-audio")
+                                (aset "converted?" convert?)
+                                (aset "data" (cond-> data
+                                               convert?
+                                               clj->js))))))))
 
 (defn main-exit-node
   [worker data-fn]
   (set! (.-onmessage worker)
         (fn [msg]
-          (let [name    (aget (.-data msg) "name")
-                data    (aget (.-data msg) "data")]
+          (let [name       (aget (.-data msg) "name")
+                converted? (aget (.-data msg) "converted?")
+                data       (aget (.-data msg) "data")]
             (when (= name "main-process-audio")
               (when data-fn
-                (data-fn data)))))))
+                (data-fn (cond-> data
+                           converted?
+                           js->clj))))))))
