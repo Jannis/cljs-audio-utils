@@ -134,7 +134,7 @@
                         (.disconnect source)
                         (.disconnect dest)
                         (go
-                          (<! (timeout 5000))
+                          (<! (timeout 10000))
                           (.disconnect entry-node)
                           (.terminate worker)
                           (.close ctx)
@@ -142,7 +142,7 @@
                                  :processing? false
                                  :finished?   true
                                  :mp3s        @mp3s))))
-                (.start source 0 0 20.0)))
+                (.start source 0 0 40.0)))
             (log-error [ctx err]
               (js/console.warn "ERROR" ctx err)
               (js/alert err)
