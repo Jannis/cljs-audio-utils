@@ -32,7 +32,7 @@
          '[pandeiro.boot-http :refer [serve]])
 
 (def +project+ 'cljs-audio-utils)
-(def +version+ "0.1.0")
+(def +version+ "0.1.1")
 
 (bootlaces! +version+ :dont-modify-paths? true)
 
