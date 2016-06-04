@@ -1,3 +1,0 @@
-{:require  [audio-utils.devcards.workers.chunker-2]
- :init-fns [audio-utils.devcards.workers.chunker-2/init]
- :compiler-options {:optimizations :simple}}

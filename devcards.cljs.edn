@@ -1,2 +1,0 @@
-{:require [audio-utils.devcards.core]
- :init-fns [audio-utils.devcards.core/init]}

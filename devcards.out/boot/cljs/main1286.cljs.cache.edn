@@ -1,2 +1,0 @@
-;; Analyzed by ClojureScript 1.7.228
-{:name boot.cljs.main1286, :doc nil, :excludes #{}, :use-macros nil, :require-macros nil, :uses nil, :requires {audio-utils.devcards.core audio-utils.devcards.core}, :imports nil}

@@ -1,3 +1,0 @@
-{:require  [audio-utils.devcards.workers.gate-1]
- :init-fns [audio-utils.devcards.workers.gate-1/init]
- :compiler-options {:optimizations :simple}}
