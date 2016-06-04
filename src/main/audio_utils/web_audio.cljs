@@ -5,6 +5,13 @@
                         js/window.webkitAudioContext)]
     (constructor.)))
 
+(defn user-media
+  [constraints success-fn error-fn]
+  (.webkitGetUserMedia js/navigator
+                       (clj->js constraints)
+                       success-fn
+                       error-fn))
+
 (defn create-buffer
   ([ctx n-channels size sample-rate]
    (.createBuffer ctx n-channels size sample-rate)))
