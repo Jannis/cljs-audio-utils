@@ -18,9 +18,6 @@
 
   (process-audio [this data]
     (when (<< capturing?)
-      (js/console.log "TRIGGERED CHUNKER: PROCESS AUDIO"
-                      data
-                      (<< capturing?))
       (let [n-channels (count data)
             n-samples  (count (first data))]
         (dotimes [n n-samples]
@@ -42,7 +39,6 @@
       (>> chunks empty-chunks)))
 
   (trigger [this capture?]
-    (js/console.log "TRIGGERED CHUNKER: TRIGGER: capture?" capture?)
     (when-not capture?
       (deliver-chunks this)
       (reset-chunks this))
