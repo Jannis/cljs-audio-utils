@@ -81,6 +81,13 @@
    (watch)
    (test-cljs)))
 
+(deftask install-local
+  []
+  (comp
+   (pom)
+   (jar)
+   (install)))
+
 (deftask deploy-snapshot
   []
   (comp
