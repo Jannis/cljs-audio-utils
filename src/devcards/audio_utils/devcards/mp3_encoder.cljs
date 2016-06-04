@@ -185,14 +185,24 @@
                          "Run test"]))))
 
 (defcard
-  ""
+  "An OGG played back, chunked and encoded into 5s long MP3s with
+   a 160kb/s bit rate and a sample rate of 44100. The concatenated
+   result shows notable audio glitches where the MP3s are stitched
+   together, likely resulting from encoding and decoding slightly
+   altering the waveforms."
   (fn [state owner]
     (encoder-test state))
   {:worker "mp3-encoder-1.js"
    :source "public/viper.ogg"})
 
 (defcard
-  ""
+  "A 1000Hz sine wave, played back at -30dB for 2 seconds, -3dB for
+   2 seconds, -30dB for 2 seconds, -6dB for 2 seconds and -30dB for
+   2 seconds. It is processed using a gate (threshold -16dB, look-ahead
+   500ms, hold time 1000ms, RMS window 100ms) and is chunked using a
+   triggered chunker controlled by the gate. The result are two MP3s
+   for the -3dB and -6dB periods, with a 500ms and 1000ms of the quieter
+   audio signal at the beginning and end, respectively."
   (fn [state owner]
     (encoder-test state))
   {:worker "mp3-encoder-2.js"
