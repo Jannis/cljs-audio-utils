@@ -52,3 +52,10 @@
    of dB."
   [coll db]
   (map #(amplify-sample % db) coll))
+
+;;;; Timing functionality
+
+(defn now
+  "Returns the current time via js/Date."
+  []
+  (.now js/Date))

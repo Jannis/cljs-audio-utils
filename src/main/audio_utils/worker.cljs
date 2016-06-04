@@ -1,4 +1,5 @@
-(ns audio-utils.worker)
+(ns audio-utils.worker
+  (:require [audio-utils.util :as util]))
 
 ;;;; General interface for audio processing nodes in web workers
 
@@ -20,7 +21,8 @@
                                 output-channels)
     (aset "onaudioprocess"
           (fn [event]
-            (let [input-buffer  (.-inputBuffer event)
+            (let [time          (util/now)
+                  input-buffer  (.-inputBuffer event)
                   output-buffer (.-outputBuffer event)
                   n-channels    (.-numberOfChannels input-buffer)
                   worker-buffer (.createBuffer ctx n-channels
@@ -43,6 +45,7 @@
                                        (into-array))
                     msg-data      (doto #js []
                                     (aset "name" "worker-process-audio")
+                                    (aset "time" time)
                                     (aset "data" data))]
                 (.postMessage worker msg-data transferables)))))))
 
@@ -63,10 +66,16 @@
                    (process-audio @next data))))]
     (set! (.-onmessage js/self)
           (fn [msg]
-            (let [name     (aget (.-data msg) "name")
-                  data     (aget (.-data msg) "data")
-                  clj-data (mapv #(into [] (array-seq %))
-                                 (array-seq data))]
+            (let [name         (aget (.-data msg) "name")
+                  source-time  (aget (.-data msg) "time")
+                  data         (aget (.-data msg) "data")
+                  clj-data     (mapv #(into [] (array-seq %))
+                                     (array-seq data))
+                  time         (util/now)]
+              (js/console.log "WORKER ENTRY NODE / ONMESSAGE")
+              (js/console.log "SOURCE TIME" source-time)
+              (js/console.log "TIME" time)
+              (js/console.log "LATENCY" (- time source-time))
               (when (= name "worker-process-audio")
                 (process-audio node clj-data)))))
     node))
