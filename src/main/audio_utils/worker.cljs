@@ -1,4 +1,5 @@
-(ns audio-utils.worker)
+(ns audio-utils.worker
+  (:require [audio-utils.util :as u]))
 
 ;;;; General interface for audio processing nodes in web workers
 
@@ -63,12 +64,11 @@
                    (process-audio @next data))))]
     (set! (.-onmessage js/self)
           (fn [msg]
-            (let [name     (aget (.-data msg) "name")
-                  data     (aget (.-data msg) "data")
-                  clj-data (mapv #(into [] (array-seq %))
-                                 (array-seq data))]
+            (let [name         (aget (.-data msg) "name")
+                  data         (aget (.-data msg) "data")]
+              (js/console.log "WORKER ENTRY NODE / ONMESSAGE")
               (when (= name "worker-process-audio")
-                (process-audio node clj-data)))))
+                (process-audio node data)))))
     node))
 
 (defn worker-exit-node
@@ -80,23 +80,16 @@
     (connect [this destination])
     (disconnect [this])
     (process-audio [this data]
-      (let [convert? (not (array? data))]
-        (.postMessage js/self (doto #js []
-                                (aset "name" "main-process-audio")
-                                (aset "converted?" convert?)
-                                (aset "data" (cond-> data
-                                               convert?
-                                               clj->js))))))))
+      (.postMessage js/self (doto #js []
+                              (aset "name" "main-process-audio")
+                              (aset "data" data))))))
 
 (defn main-exit-node
   [worker data-fn]
   (set! (.-onmessage worker)
         (fn [msg]
           (let [name       (aget (.-data msg) "name")
-                converted? (aget (.-data msg) "converted?")
                 data       (aget (.-data msg) "data")]
             (when (= name "main-process-audio")
               (when data-fn
-                (data-fn (cond-> data
-                           converted?
-                           js->clj))))))))
+                (data-fn data)))))))
