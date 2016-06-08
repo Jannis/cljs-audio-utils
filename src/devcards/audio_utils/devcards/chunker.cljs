@@ -6,6 +6,7 @@
             [sablono.core :refer-macros [html]]
             [audio-utils.chunker :as c]
             [audio-utils.web-audio :as a]
+            [audio-utils.util :as u]
             [audio-utils.viz :refer [linear-distribution
                                      plot-buffers
                                      sine-wave]]
@@ -27,9 +28,9 @@
                                         :output-channels 1})
         chunks      #js []
         exit-node   (w/main-exit-node worker
-                                      (fn [channel-chunks]
-                                        (let [chunk (channel-chunks 0)]
-                                          (.push chunks chunk))))
+                                      (fn [chnks]
+                                        (let [chunk (u/anth chnks 0)]
+                                          (u/aconj chunks chunk))))
         dest        (.createMediaStreamDestination ctx)]
     (.connect source entry-node)
     (.connect entry-node dest)
