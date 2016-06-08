@@ -1,8 +1,8 @@
 (ns audio-utils.gate
   (:require [audio-utils.ring-buffer :as rb]
             [audio-utils.rms-buffer :as rms]
-            [audio-utils.util :refer [aatom << >> aswap!
-                                      db->amplitude time->samples]]
+            [audio-utils.util :as u
+             :refer [aatom << >> aswap! db->amplitude time->samples]]
             [audio-utils.worker :as w]))
 
 (defprotocol IGate
@@ -22,16 +22,16 @@
     (reset! next nil))
 
   (process-audio [this data]
-    (let [n-channels (count data)
-          n-samples  (count (first data))
-          output     (volatile! (into [] (repeat n-channels [])))]
+    (let [n-channels (u/acount data)
+          n-samples  (u/acount (u/afirst data))
+          output     (into-array (repeat n-channels #js []))]
       (dotimes [n n-samples]
         (dotimes [channel n-channels]
-          (let [input-sample  ((data channel) n)
+          (let [input-sample  (u/anth (u/anth data channel) n)
                 output-sample (generate-output-sample this channel
                                                       input-sample)]
-            (vswap! output update channel conj output-sample))))
-      (some-> @next (w/process-audio @output))))
+            (u/aconj (u/anth output channel) output-sample))))
+      (some-> @next (w/process-audio output))))
 
   IGate
   (generate-output-sample [this channel input-sample]
