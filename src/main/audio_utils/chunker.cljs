@@ -1,5 +1,6 @@
 (ns audio-utils.chunker
-  (:require [audio-utils.worker :as w]))
+  (:require [audio-utils.util :as u]
+            [audio-utils.worker :as w]))
 
 (defprotocol IChunker
   (process-samples [this samples])
@@ -15,31 +16,35 @@
     (reset! next nil))
 
   (process-audio [this data]
-    (let [n-channels (count data)
-          n-samples  (count (first data))]
+    (let [n-channels (u/acount data)
+          n-samples  (u/acount (u/afirst data))]
       (dotimes [n n-samples]
-        (let [samples (mapv #(nth % n) data)]
+        (let [samples (u/amap #(u/anth % n) data)]
           (process-samples this samples)))))
 
   IChunker
   (process-samples [this samples]
-    (dotimes [channel (count samples)]
-      (let [sample (samples channel)]
-        (swap! chunks update channel conj sample)))
-    (when (>= (count (first @chunks)) samples-per-chunk)
+    (dotimes [channel (u/acount samples)]
+      (let [sample (u/anth samples channel)]
+        (u/aswap! chunks u/aupdate channel
+                  (fn [arr]
+                    (doto (or arr (array))
+                      (u/aconj sample))))))
+    (when (>= (u/acount (u/afirst (u/<< chunks)))
+              samples-per-chunk)
       (deliver-chunks this)
-      (reset-chunks this (count samples))))
+      (reset-chunks this (u/acount samples))))
 
   (deliver-chunks [this]
-    (some-> @next (w/process-audio @chunks)))
+    (some-> @next (w/process-audio (u/<< chunks))))
 
   (reset-chunks [this n-channels]
-    (let [empty-chunks (into [] (repeat n-channels []))]
-      (reset! chunks empty-chunks))))
+    (let [empty-chunks (into-array (repeat n-channels #js []))]
+      (u/areset! chunks empty-chunks))))
 
 (defn chunker
   [{:keys [samples-per-chunk]
     :or {samples-per-chunk 4410}}]
   (map->Chunker {:samples-per-chunk samples-per-chunk
                  :next              (atom nil)
-                 :chunks            (atom [])}))
+                 :chunks            (u/aatom #js [])}))
