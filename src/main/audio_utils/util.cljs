@@ -1,4 +1,5 @@
-(ns audio-utils.util)
+(ns audio-utils.util
+  (:refer-clojure :exclude [amap]))
 
 ;;;; Pseudo atom based on a JS array
 
@@ -21,6 +22,38 @@
 
 (def << aderef)
 (def >> areset!)
+
+;;;; Array utilities to make using arrays more like using vectors
+
+(defn acount
+  [array]
+  (.-length array))
+
+(defn afirst
+  [array]
+  (aget array 0))
+
+(defn anth
+  [array n]
+  (aget array n))
+
+(defn amap
+  [f array]
+  (into-array (map f (array-seq array))))
+
+(defn aconj
+  [arr x]
+  (doto (or arr (array))
+    (.push x)))
+
+(defn aassoc
+  [array n v]
+  (aset array n v)
+  array)
+
+(defn aupdate
+  [array n f & args]
+  (aassoc array n (apply f (into [(anth array n)] args))))
 
 ;;;; Time/samples and dB/amplitude conversion
 
