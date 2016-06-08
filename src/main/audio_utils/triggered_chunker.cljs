@@ -1,5 +1,5 @@
 (ns audio-utils.triggered-chunker
-  (:require [audio-utils.util :refer [aatom aswap! << >>]]
+  (:require [audio-utils.util :as u :refer [aatom aswap! << >>]]
             [audio-utils.worker :as w]))
 
 (defprotocol ITriggeredChunker
@@ -18,24 +18,24 @@
 
   (process-audio [this data]
     (when (<< capturing?)
-      (let [n-channels (count data)
-            n-samples  (count (first data))]
+      (let [n-channels (u/acount data)
+            n-samples  (u/acount (u/afirst data))]
         (dotimes [n n-samples]
-          (let [samples (mapv #(nth % n) data)]
+          (let [samples (u/amap #(u/anth % n) data)]
             (process-samples this samples))))))
 
   ITriggeredChunker
   (process-samples [this samples]
-    (dotimes [channel (count samples)]
-      (let [sample (samples channel)]
-        (aswap! chunks update channel conj sample))))
+    (dotimes [channel (u/acount samples)]
+      (let [sample (u/anth samples channel)]
+        (aswap! chunks u/aupdate channel u/aconj sample))))
 
   (deliver-chunks [this]
     (some-> @next (w/process-audio (<< chunks))))
 
   (reset-chunks [this]
     (let [n-channels   (count (<< chunks))
-          empty-chunks (into [] (repeat n-channels []))]
+          empty-chunks (into-array (repeat n-channels (array)))]
       (>> chunks empty-chunks)))
 
   (trigger [this capture?]
@@ -47,5 +47,5 @@
 (defn triggered-chunker
   []
   (map->TriggeredChunker {:next       (atom nil)
-                          :chunks     (aatom [])
+                          :chunks     (aatom #js [])
                           :capturing? (aatom false)}))
