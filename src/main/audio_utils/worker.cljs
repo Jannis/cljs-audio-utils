@@ -1,5 +1,5 @@
 (ns audio-utils.worker
-  (:require [audio-utils.util :as util]))
+  (:require [audio-utils.util :as u]))
 
 ;;;; General interface for audio processing nodes in web workers
 
@@ -21,7 +21,7 @@
                                 output-channels)
     (aset "onaudioprocess"
           (fn [event]
-            (let [time          (util/now)
+            (let [time          (u/now)
                   input-buffer  (.-inputBuffer event)
                   output-buffer (.-outputBuffer event)
                   n-channels    (.-numberOfChannels input-buffer)
@@ -69,15 +69,10 @@
             (let [name         (aget (.-data msg) "name")
                   source-time  (aget (.-data msg) "time")
                   data         (aget (.-data msg) "data")
-                  clj-data     (mapv #(into [] (array-seq %))
-                                     (array-seq data))
-                  time         (util/now)]
+                  time         (u/now)]
               (js/console.log "WORKER ENTRY NODE / ONMESSAGE")
-              (js/console.log "SOURCE TIME" source-time)
-              (js/console.log "TIME" time)
-              (js/console.log "LATENCY" (- time source-time))
               (when (= name "worker-process-audio")
-                (process-audio node clj-data)))))
+                (process-audio node data)))))
     node))
 
 (defn worker-exit-node
@@ -89,23 +84,16 @@
     (connect [this destination])
     (disconnect [this])
     (process-audio [this data]
-      (let [convert? (not (array? data))]
-        (.postMessage js/self (doto #js []
-                                (aset "name" "main-process-audio")
-                                (aset "converted?" convert?)
-                                (aset "data" (cond-> data
-                                               convert?
-                                               clj->js))))))))
+      (.postMessage js/self (doto #js []
+                              (aset "name" "main-process-audio")
+                              (aset "data" data))))))
 
 (defn main-exit-node
   [worker data-fn]
   (set! (.-onmessage worker)
         (fn [msg]
           (let [name       (aget (.-data msg) "name")
-                converted? (aget (.-data msg) "converted?")
                 data       (aget (.-data msg) "data")]
             (when (= name "main-process-audio")
               (when data-fn
-                (data-fn (cond-> data
-                           converted?
-                           js->clj))))))))
+                (data-fn data)))))))
