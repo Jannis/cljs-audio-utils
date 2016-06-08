@@ -1,5 +1,6 @@
 (ns audio-utils.mp3-encoder
   (:require [cljsjs.lamejs]
+            [audio-utils.util :as u]
             [audio-utils.worker :as w]))
 
 (defrecord MP3Encoder [bit-rate sample-rate next]
@@ -11,14 +12,14 @@
     (reset! next nil))
 
   (process-audio [this data]
-    (let [int-data (mapv (fn [samples]
-                           (into-array (map #(* 32768 %) samples)))
-                         data)
-          encoder  (js/lamejs.Mp3Encoder. (count data) sample-rate
+    (let [int-data (u/amap (fn [samples]
+                             (u/amap #(* 32768 %) samples))
+                           data)
+          encoder  (js/lamejs.Mp3Encoder. (u/acount data) sample-rate
                                           bit-rate)
           encoded  #js []]
       (doto encoded
-        (.push (apply (aget encoder "encodeBuffer") int-data))
+        (.push (apply (.-encodeBuffer encoder) int-data))
         (.push (.flush encoder)))
       (some-> @next (w/process-audio encoded)))))
 
